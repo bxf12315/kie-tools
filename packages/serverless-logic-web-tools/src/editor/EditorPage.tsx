@@ -93,6 +93,7 @@ export function EditorPage(props: Props) {
   const isEditorReady = useMemo(() => editor?.isReady, [editor]);
   const [isReady, setReady] = useState(false);
   const swfFeatureToggle = useSwfFeatureToggle(editor);
+  const [canContentBeDeployed, setCanContentBeDeployed] = useState(false);
 
   const queryParams = useQueryParams();
   const virtualServiceRegistry = useVirtualServiceRegistry();
@@ -351,6 +352,7 @@ export function EditorPage(props: Props) {
     swfLanguageService,
     dashbuilderLanguageService,
     swfServiceCatalogChannelApiImpl,
+    isDash,
     swfFeatureToggleChannelApiImpl,
     swfLanguageServiceChannelApiImpl,
     dashbuilderLanguageServiceChannelApiImpl,
@@ -383,6 +385,10 @@ export function EditorPage(props: Props) {
             } as Notification)
         );
 
+        setCanContentBeDeployed(
+          lastContent.current?.trim() !== "" && !diagnostics.some((d) => ["ERROR", "WARNING"].includes(d.severity))
+        );
+
         editorPageDock?.setNotifications(i18n.terms.validation, "", diagnostics);
       })
       .catch((e) => console.error(e));
@@ -412,7 +418,7 @@ export function EditorPage(props: Props) {
         new Position(notification.position.startLineNumber, notification.position.startColumn)
       );
     },
-    [swfEditorChannelApi]
+    [swfEditorChannelApi, embeddedEditorFile]
   );
   return (
     <OnlineEditorPage>
@@ -429,6 +435,7 @@ export function EditorPage(props: Props) {
                 alerts={alerts}
                 alertsRef={alertsRef}
                 editorPageDock={editorPageDock}
+                canContentBeDeployed={canContentBeDeployed}
               />
               <Divider />
               <EditorPageDockDrawer
