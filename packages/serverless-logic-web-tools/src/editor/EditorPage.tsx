@@ -69,6 +69,8 @@ import { DashbuilderLanguageService } from "@kie-tools/dashbuilder-language-serv
 import { DashbuilderEditorChannelApiImpl } from "@kie-tools/dashbuilder-editor/dist/impl";
 import { DashbuilderLanguageServiceChannelApi } from "@kie-tools/dashbuilder-language-service/dist/api";
 import { useGlobalAlertsDispatchContext } from "../alerts/GlobalAlertsContext";
+import { useEditorDispatch } from "./hooks/EditorContext";
+
 export interface Props {
   workspaceId: string;
   fileRelativePath: string;
@@ -93,7 +95,7 @@ export function EditorPage(props: Props) {
   const [isReady, setReady] = useState(false);
   const swfFeatureToggle = useSwfFeatureToggle(editor);
   const alertsDispatch = useGlobalAlertsDispatchContext();
-  const [canContentBeDeployed, setCanContentBeDeployed] = useState(false);
+  const editorDispatch = useEditorDispatch();
 
   const queryParams = useQueryParams();
   const virtualServiceRegistry = useVirtualServiceRegistry();
@@ -385,14 +387,12 @@ export function EditorPage(props: Props) {
             } as Notification)
         );
 
-        setCanContentBeDeployed(
-          lastContent.current?.trim() !== "" && !diagnostics.some((d) => ["ERROR", "WARNING"].includes(d.severity))
-        );
+        editorDispatch.setNotifications(diagnostics);
 
         editorPageDock?.setNotifications(i18n.terms.validation, "", diagnostics);
       })
       .catch((e) => console.error(e));
-  }, [workspaceFilePromise.data, editor, swfLanguageService, editorPageDock, i18n.terms.validation]);
+  }, [workspaceFilePromise.data, editor, swfLanguageService, editorPageDock, i18n.terms.validation, editorDispatch]);
 
   const swfEditorChannelApi = useMemo(
     () =>
@@ -429,12 +429,7 @@ export function EditorPage(props: Props) {
         resolved={(file) => (
           <>
             <Page>
-              <EditorToolbar
-                workspaceFile={file.workspaceFile}
-                editor={editor}
-                editorPageDock={editorPageDock}
-                canContentBeDeployed={canContentBeDeployed}
-              />
+              <EditorToolbar workspaceFile={file.workspaceFile} editor={editor} />
               <Divider />
               <EditorPageDockDrawer
                 ref={editorPageDockRef}
