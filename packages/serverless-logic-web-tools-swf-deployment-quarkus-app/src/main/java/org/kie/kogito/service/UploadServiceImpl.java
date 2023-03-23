@@ -20,7 +20,8 @@ import io.quarkus.runtime.Startup;
 import org.apache.commons.io.FileUtils;
 import org.jboss.logging.Logger;
 import org.kie.kogito.codegen.api.context.impl.JavaKogitoBuildContext;
-import org.kie.kogito.serverless.workflow.parser.ServerlessWorkflowParser;
+//import org.kie.kogito.serverless.workflow.parser.ServerlessWorkflowParser;
+import org.kie.kogito.serverless.workflow.utils.ServerlessWorkflowUtils;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -96,19 +97,21 @@ public class UploadServiceImpl implements UploadService {
             var path = Paths.get(filePath);
             try {
                 var format = path.getFileName().endsWith(".sw.json") ? "json" : "yml";
-                var parser = ServerlessWorkflowParser.of(
-                        new InputStreamReader(new FileInputStream(path.toAbsolutePath().toString())),
-                        format,
-                        JavaKogitoBuildContext.builder().build());
-                // TODO CAPONETTO: is there a better way to validate sw files?
-                var workflowId = parser.getProcessInfo().info().getId();
-                // Apparently Kogito does not support workflowId with dashes
-                if (workflowId.contains("-")) {
-                    LOGGER.error("Error when validating file. " + workflowId + " contains dash chars.");
-                } else {
-                    validFilePaths.add(filePath);
-                    LOGGER.info("Workflow validated: " + parser.getProcessInfo().info().getId());
-                }
+                var workflow =ServerlessWorkflowUtils.getWorkflow(new InputStreamReader(new FileInputStream(path.toAbsolutePath().toString())),
+                        format);
+                // var parser = ServerlessWorkflowParser.of(
+                //         new InputStreamReader(new FileInputStream(path.toAbsolutePath().toString())),
+                //         format,
+                //         JavaKogitoBuildContext.builder().build());
+                // // TODO CAPONETTO: is there a better way to validate sw files?
+                // var workflowId = parser.getProcessInfo().info().getId();
+                // // Apparently Kogito does not support workflowId with dashes
+                // if (workflowId.contains("-")) {
+                //     LOGGER.error("Error when validating file. " + workflowId + " contains dash chars.");
+                // } else {
+                //     validFilePaths.add(filePath);
+                //     LOGGER.info("Workflow validated: " + parser.getProcessInfo().info().getId());
+                // }
             } catch (Exception e) {
                 LOGGER.error("Error when validating file: " + e.getMessage());
             }
