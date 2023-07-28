@@ -2,7 +2,11 @@
   "extends": "@kie-tools/tsconfig/tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
-    "esModuleInterop": true
+    //    "esModuleInterop": true,
+    "target": "es2022",
+    "noImplicitAny": false,
+    "noImplicitThis": false,
+    "suppressImplicitAnyIndexErrors": true
   },
   "include": ["src"]
 }

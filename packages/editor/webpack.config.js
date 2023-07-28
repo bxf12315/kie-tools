@@ -19,6 +19,11 @@ module.exports = (env, argv) => [
     module: {
       rules: [
         {
+          test: /\.(ts|tsx)$/,
+          include: [path.resolve("./src")],
+          use: require.resolve("ts-loader"),
+        },
+        {
           test: /\.(woff|woff2|eot|ttf|otf)$/i,
           use: require.resolve("url-loader"),
         },
